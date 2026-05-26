@@ -61,15 +61,21 @@ char	*allocate_disk_file_to_ram(int fd, int size)
 {
 	char	*buff;
 	int		success_read;
+	int		total_read;
 
 	buff = malloc(size);
 	if (buff == NULL)
 		return (NULL);
-	success_read = read(fd, buff, size);
-	if (success_read == -1)
+	total_read = 0;
+	while (total_read < size)
 	{
-		free(buff);
-		return (NULL);
+		success_read = read(fd, buff + total_read, size - total_read);
+		if (success_read <= 0)
+		{
+			free(buff);
+			return (NULL);
+		}
+		total_read += success_read;
 	}
 	return (buff);
 }

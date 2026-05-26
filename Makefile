@@ -1,25 +1,35 @@
-NAME		= bsq
+NAME = bsq
 
-CC			= cc
-CFLAGS		= -Wall -Wextra -Werror
+CC = cc
 
-SRCS		= main.c map_reader.c map_checker.c solver.c util.c
-OBJS		= $(SRCS:.c=.o)
+CFLAGS = -Wall -Wextra -Werror
 
-all:		$(NAME)
+SRCS = main.c \
+       map_reader.c \
+       map_checker.c \
+       stdin_reader.c \
+       solve_bsq.c
 
-$(NAME):	$(OBJS)
-			$(CC) $(CFLAGS) $(OBJS) -o $(NAME)
+OBJS = $(SRCS:.c=.o)
 
-%.o:		%.c bsq.h
-			$(CC) $(CFLAGS) -c $< -o $@
+HEADER = bsq.h
+
+all: $(NAME)
+
+$(NAME): $(OBJS)
+	$(CC) $(CFLAGS) $(OBJS) -o $(NAME)
+
+%.o: %.c $(HEADER)
+	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-			rm -f $(OBJS)
+	rm -f $(OBJS)
 
-fclean:		clean
-			rm -f $(NAME)
+fclean: clean
+	rm -f $(NAME)
 
-re:			fclean all
+re:
+	$(MAKE) fclean
+	$(MAKE) all
 
-.PHONY:		all clean fclean re
+.PHONY: all clean fclean re

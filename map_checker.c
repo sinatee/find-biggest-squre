@@ -12,9 +12,16 @@
 
 #include "bsq.h"
 
-void	check_map(char *map)
+int	check_map(char *map, int size, t_map_info *info)
 {
-	
+	int	pos;
+
+	pos = check_first_line(map, size, info);
+	if (pos == -1)
+		return (-1);
+	if (check_all_rows(map, pos, size, info) == -1)
+		return (-1);
+	return (pos);
 }
 
 // check if the first line is valid
@@ -56,6 +63,9 @@ int	get_num_first_line(char *map, int first_line_len)
 	{
 		if (map[i] < '0' || map[i] > '9')
 			return (-1);
+		if (first_line_num > 214748364
+			|| (first_line_num == 214748364 && (map[i] - '0') > 7))
+			return (-1);
 		first_line_num = (first_line_num * 10) + (map[i] - '0');
 		i++;
 	}
@@ -64,29 +74,33 @@ int	get_num_first_line(char *map, int first_line_len)
 	return (first_line_num);
 }
 
+static int	is_valid_char(char c, t_map_info *info)
+{
+	return (c == info->empty || c == info->obstacle || c == '\n');
+}
+
 int	check_all_rows(char *map, int pos, int size, t_map_info *info)
 {
-	int	old_len;
 	int	cur_len;
 	int	row;
 
-	old_len = -1;
 	cur_len = 0;
 	row = 0;
+	info->width = 0;
 	while (pos < size)
 	{
+		if (!is_valid_char(map[pos], info))
+			return (-1);
 		if (map[pos] == '\n')
 		{
-			if ((cur_len == 0) || (old_len != -1 && old_len != cur_len))
+			if ((cur_len == 0) || (info->width != 0 && cur_len != info->width))
 				return (-1);
-			old_len = cur_len;
+			if (info->width == 0)
+				info->width = cur_len;
 			cur_len = 0;
 			row++;
 		}
-		else if ((map[pos] != info->empty) && map[pos] != info->obstacle)
-			return (-1);
-		else
-			cur_len++;
+		cur_len += (map[pos] != '\n');
 		pos++;
 	}
 	if (row != info->lines || cur_len != 0)
